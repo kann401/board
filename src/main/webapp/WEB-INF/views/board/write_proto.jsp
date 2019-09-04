@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+<!-- 인터셉터로 url을 통해 게시글 작성 페이지로의 접근 차단할 것. -->
 <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
 <title> Board Write Form </title>
 <!-- Jquery 연결 -->
