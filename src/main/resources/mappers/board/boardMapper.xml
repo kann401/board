@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="board">
+	<select id="listAll" resultType="com.example.board.model.board.dto.BoardDTO">
+	<include refid="paging_header" />
+	select bno, title, writer, name, regdate, viewcnt,
+    (select count(*) from reply where bno=b.bno) cnt
+	from board b, member m
+	<include refid="search" />
+	order by bno desc
+	<include refid="paging_footer" />
+	</select>
+	
+	<select id="countArticle" resultType="int">
+		select count(*)
+		from board b, member m
+		<include refid="search"/>
+	</select>
+	<!-- 클릭한 게시물의 조회수를 올리는 쿼리 -->
+	<update id="increaseViewcnt">
+		update board
+		set viewcnt = viewcnt+1
+		where bno = #{bno}
+	</update>
+	<!-- 클릭한 글의 본문내용 (content)를 불러오는 쿼리 -->
+	<select id="view" resultType="com.example.board.model.board.dto.BoardDTO">
+		select bno,title,content,regdate,viewcnt,name,writer
+		from board b, member m
+		where b.writer=m.userid and bno=#{bno}
+	</select>
+	
+	<!-- 게시글 수정 -->
+	<update id="updateArticle">
+	update board set 
+	title=#{title}, content=#{content}
+	where bno=#{bno}
+	</update>
+	<!-- 게시글 삭제 -->
+	<delete id="deleteArticle">
+	delete from board
+	where bno = #{bno}
+	</delete>
+	<sql id="search">
+	<!-- all : 이름, 내용, 제목 다 찾아본다. -->
+	<!-- ${}가 되면 sql 쿼리상 ''가 없어지고, #{}은 ''가 붙는다. -->
+		<choose>
+			<when test="search_option == 'all' ">
+				where b.writer=m.userid
+					and (name like '%'||#{keyword}||'%'
+						or content like '%'||#{keyword}||'%'
+						or title like '%'||#{keyword}||'%' )
+			</when>
+			<otherwise>
+				where b.writer=m.userid
+					and ${search_option} like '%'|| #{keyword}||'%'
+			</otherwise>
+		</choose>
+	</sql>
+	
+	<sql id="paging_header">
+		select *
+		from (
+			select rownum as rn, A.*
+			from (
+	</sql>
+	
+	<sql id="paging_footer">
+		) A
+	) where rn between #{start} and #{end}
+	</sql>
+	
+	<insert id="insert">
+		insert into board (bno, title, content,writer) values
+		(seq_board.nextval, #{title},#{content},#{writer})
+	</insert>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
